@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Stable Meetings",
+  "version": "1.0.1",
+
+  "action": {"default_popup": "index.html"},
+  "description": "Show mobile data coverage on your train ride",
+  "permissions": ["activeTab", "storage", "tabs"],
+
+  "content_scripts": [
+    {
+      "matches": ["https://www.google.de/maps/*"],
+      "js": ["connection-check-script.js"]
+    }
+  ],
+  "author": "developer@example.com"
+
+}
