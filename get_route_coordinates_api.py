@@ -62,7 +62,7 @@ def get_route():
     mode = request.args.get('mode', 'transit')
     distance_interval = float(request.args.get('distance_interval', 5))
 
-    api_key = 'YOUR_API_KEY_HERE'
+    api_key = 'AIzaSyCtPeBlGL_cmAUcc8ljVyB-hzwFTB4ofmU'
 
     route_coordinates = get_route_coordinates(origin, destination, api_key, mode, distance_interval)
 
