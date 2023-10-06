@@ -62,7 +62,6 @@ def get_route():
     mode = request.args.get('mode', 'transit')
     distance_interval = float(request.args.get('distance_interval', 5))
 
-    # Replace with your actual API key
     api_key = 'YOUR_API_KEY_HERE'
 
     route_coordinates = get_route_coordinates(origin, destination, api_key, mode, distance_interval)
@@ -70,15 +69,10 @@ def get_route():
     return jsonify(route_coordinates)
 
 
-#if __name__ == '__main__':
- #   app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
 
-api_key = 'xxxxx'
-origin = '51.11902, 10.33692'
-destination = '50.48072, 9.6704'
-route_coordinates = get_route_coordinates(origin, destination, api_key)
-print(route_coordinates)
-print(len(route_coordinates))
+
 
 
 
