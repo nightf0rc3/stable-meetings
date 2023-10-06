@@ -68,6 +68,10 @@ def get_route():
 
     return jsonify(route_coordinates)
 
+@app.route('/test', methods=['GET'])
+def test():
+    return 'Test Successful'
+
 
 if __name__ == '__main__':
     app.run(debug=True)
