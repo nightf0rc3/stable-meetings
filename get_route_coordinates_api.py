@@ -8,6 +8,7 @@ from shapely.geometry import box
 
 app = Flask(__name__)
 
+"""
 db_connection = psycopg2.connect(
     database='your_database_name',
     user='your_username',
@@ -15,6 +16,7 @@ db_connection = psycopg2.connect(
     host='your_host',
     port='your_port'
 )
+"""
 
 
 def haversine(lat1, lon1, lat2, lon2):
