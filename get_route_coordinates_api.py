@@ -2,8 +2,20 @@ import requests
 import polyline
 from math import radians, sin, cos, sqrt, atan2
 from flask import Flask, request, jsonify
+import psycopg2
+from shapely.geometry import box
+
 
 app = Flask(__name__)
+
+db_connection = psycopg2.connect(
+    database='your_database_name',
+    user='your_username',
+    password='your_password',
+    host='your_host',
+    port='your_port'
+)
+
 
 def haversine(lat1, lon1, lat2, lon2):
     # Convert latitude and longitude from degrees to radians
@@ -65,13 +77,26 @@ def get_route():
     api_key = 'AIzaSyCtPeBlGL_cmAUcc8ljVyB-hzwFTB4ofmU'
 
     route_coordinates = get_route_coordinates(origin, destination, api_key, mode, distance_interval)
+    envelopes = []
 
-    return jsonify(route_coordinates)
+    cursor = db_connection.cursor()
 
-@app.route('/test', methods=['GET'])
-def test():
-    return 'Test Successful'
+    for i in range(len(route_coordinates) - 1):
+        current_latitude, current_longitude = route_coordinates[i]
+        next_latitude, next_longitude = route_coordinates[i + 1]
 
+        envelope = box(min(current_longitude, next_longitude), min(current_latitude, next_latitude),
+                       max(current_longitude, next_longitude), max(current_latitude, next_latitude))
+
+        envelopes.append(envelope)
+
+        query = f'SELECT * FROM your_table WHERE ST_Within(your_geometry_column, {envelope});'
+
+        results = cursor.execute(query)
+
+    db_connection.commit()
+
+    return jsonify(results)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=80, host="0.0.0.0")
+    app.run(debug=True)
