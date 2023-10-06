@@ -10,17 +10,23 @@ from flask import Flask
 sql_query_template_wifi = """
 WITH Distances AS (
   SELECT
+    coords.input_latitude,
+    coords.input_longitude,
     wifi.latitude AS wifi_latitude,
     wifi.longitude AS wifi_longitude,
     wifi.download,
     wifi.upload,
     wifi.link_ping,
     SQRT(
-      POW(69.1 * (wifi.latitude - input_latitude), 2) +
-      POW(69.1 * (input_longitude - wifi.longitude) * COS(input_latitude / 57.3), 2)
+      POW(69.1 * (wifi.latitude - coords.input_latitude), 2) +
+      POW(69.1 * (coords.input_longitude - wifi.longitude) * COS(wifi.latitude / 57.3), 2)
     ) AS distance
-  FROM wifi_on_ice_cleaned_final AS wifi
-  WHERE (wifi.latitude, wifi.longitude) IN ({coordinate_values})
+  FROM (
+    SELECT input_latitude, input_longitude
+    FROM (VALUES {coordinate_values}) AS coords(input_latitude, input_longitude)
+  ) AS coords
+  JOIN wifi_on_ice_cleaned_final AS wifi
+  ON true  -- This is used to create a Cartesian product without a CROSS JOIN
 )
 SELECT
   input_latitude,
@@ -43,16 +49,22 @@ SELECT
   CASE WHEN MIN(distance) < 5000 THEN TRUE ELSE FALSE END AS tower_within_5000
 FROM (
   SELECT
+    coords.input_latitude,
+    coords.input_longitude,
     SQRT(
-      POW(69.1 * (celltowers.latitude - input_latitude), 2) +
-      POW(69.1 * (input_longitude - celltowers.longitude) * COS(celltowers.latitude / 57.3), 2)
+      POW(69.1 * (celltowers.latitude - coords.input_latitude), 2) +
+      POW(69.1 * (coords.input_longitude - celltowers.longitude) * COS(celltowers.latitude / 57.3), 2)
     ) AS distance
-  FROM celltowers
+  FROM (
+    SELECT input_latitude, input_longitude
+    FROM (VALUES {coordinate_values}) AS coords(input_latitude, input_longitude)
+  ) AS coords
+  JOIN celltowers
+  ON true  -- This is used to create a Cartesian product without a CROSS JOIN
   WHERE celltowers.radio != 'GSM'
   AND celltowers.radio != 'UMTS'
   AND celltowers.mcc = 262
   AND mnc IN (1, 2, 3, 7, 8, 9, 10, 12, 16, 20, 43)
-  AND (celltowers.latitude, celltowers.longitude) IN ({coordinate_values})
 ) AS Distances
 GROUP BY input_latitude, input_longitude
 ORDER BY input_latitude, input_longitude;
@@ -164,6 +176,6 @@ def get_route(origin, destination):
             conn.close()
 
 
-origin = 'Köln, Germany'
+origin = 'KÃ¶ln, Germany'
 destination = 'Dortmund, Germany'
 get_route(origin, destination)
