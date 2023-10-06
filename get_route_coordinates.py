@@ -73,7 +73,7 @@ def get_route():
 #if __name__ == '__main__':
  #   app.run(debug=True)
 
-api_key = 'AIzaSyCtPeBlGL_cmAUcc8ljVyB-hzwFTB4ofmU'
+api_key = 'xxxxx'
 origin = '51.11902, 10.33692'
 destination = '50.48072, 9.6704'
 route_coordinates = get_route_coordinates(origin, destination, api_key)
