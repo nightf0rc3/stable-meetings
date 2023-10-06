@@ -6,43 +6,21 @@ import psycopg2
 import requests
 from flask import Flask
 
+
 sql_query_template_wifi = """
 WITH Distances AS (
   SELECT
-    coords.input_latitude,
-    coords.input_longitude,
     wifi.latitude AS wifi_latitude,
     wifi.longitude AS wifi_longitude,
     wifi.download,
     wifi.upload,
     wifi.link_ping,
     SQRT(
-      POW(69.1 * (wifi.latitude - coords.input_latitude), 2) +
-      POW(69.1 * (coords.input_longitude - wifi.longitude) * COS(wifi.latitude / 57.3), 2)
+      POW(69.1 * (wifi.latitude - input_latitude), 2) +
+      POW(69.1 * (input_longitude - wifi.longitude) * COS(input_latitude / 57.3), 2)
     ) AS distance
   FROM wifi_on_ice_cleaned_final AS wifi
-  CROSS JOIN LATERAL (VALUES
-    (50.95729, 7.01305),
-(51.00055, 7.01854),
-(51.04609, 7.01251),
-(51.09114, 7.00869),
-(51.13501, 6.99893),
-(51.17963, 7.00155),
-(51.21446, 7.01899),
-(51.23683, 7.07899),
-(51.25181, 7.14207),
-(51.27079, 7.20593),
-(51.28691, 7.27366),
-(51.29948, 7.34059),
-(51.33176, 7.38092),
-(51.35075, 7.44631),
-(51.38893, 7.44692),
-(51.39037, 7.38108),
-(51.42616, 7.34943),
-(51.46355, 7.32165),
-(51.49746, 7.36559),
-(51.51008, 7.42963)
-  ) AS coords(input_latitude, input_longitude)
+  WHERE (wifi.latitude, wifi.longitude) IN ({coordinate_values})
 )
 SELECT
   input_latitude,
@@ -65,61 +43,22 @@ SELECT
   CASE WHEN MIN(distance) < 5000 THEN TRUE ELSE FALSE END AS tower_within_5000
 FROM (
   SELECT
-    coords.input_latitude,
-    coords.input_longitude,
     SQRT(
-      POW(69.1 * (celltowers.latitude - coords.input_latitude), 2) +
-      POW(69.1 * (coords.input_longitude - celltowers.longitude) * COS(celltowers.latitude / 57.3), 2)
+      POW(69.1 * (celltowers.latitude - input_latitude), 2) +
+      POW(69.1 * (input_longitude - celltowers.longitude) * COS(celltowers.latitude / 57.3), 2)
     ) AS distance
-  FROM (
-    SELECT input_latitude, input_longitude
-    FROM (VALUES (50.95984, 7.01442),
-(51.00322, 7.01859),
-(51.04797, 7.01217),
-(51.09361, 7.00816),
-(51.1375, 6.99958),
-(51.1838, 6.99984),
-(51.2151, 7.02575),
-(51.23943, 7.0848),
-(51.25424, 7.14801),
-(51.27288, 7.21322),
-(51.2889, 7.28069),
-(51.30441, 7.34367),
-(51.33362, 7.38767),
-(51.35285, 7.45282),
-(51.38971, 7.43976),
-(51.4198, 7.44501),
-(51.45698, 7.44532),
-(51.49044, 7.45477)) AS coords(input_latitude, input_longitude)
-  ) AS coords
-  JOIN celltowers
-  ON true  -- This is used to create a Cartesian product without a CROSS JOIN
+  FROM celltowers
   WHERE celltowers.radio != 'GSM'
   AND celltowers.radio != 'UMTS'
   AND celltowers.mcc = 262
   AND mnc IN (1, 2, 3, 7, 8, 9, 10, 12, 16, 20, 43)
+  AND (celltowers.latitude, celltowers.longitude) IN ({coordinate_values})
 ) AS Distances
 GROUP BY input_latitude, input_longitude
 ORDER BY input_latitude, input_longitude;
 """
 
 app = Flask(__name__)
-
-home = expanduser('~')
-# if you want to use ssh password use - ssh_password='your ssh password', bellow
-
-sql_username = 'postgres'
-sql_password = 'postgres'
-sql_main_database = 'postgres'
-
-conn = psycopg2.connect(
-    database='postgres',
-    user='postgres',
-    password='postgres',
-    host='database-1.c18atxd28p1u.eu-central-1.rds.amazonaws.com',
-    port=5432
-)
-
 
 def haversine(lat1, lon1, lat2, lon2):
     # Convert latitude and longitude from degrees to radians
@@ -205,16 +144,17 @@ def get_route(origin, destination):
         cursor.execute(sql_query_wifi)
         conn.commit()
 
-        results_wifi = cursor.fetchall()  # Use fetchall() to get all results
+        results_wifi = cursor.fetchall()
 
         print(results_wifi)
 
         cursor.execute(sql_query_cell)
         conn.commit()
 
-        results_cell = cursor.fetchall()  # Use fetchall() to get all results
+        results_cell = cursor.fetchall()
 
         print(results_cell)
+
     except Exception as e:
         print(f"Error: {e}")
     finally:
