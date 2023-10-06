@@ -100,5 +100,9 @@ def get_route():
 
     return jsonify(results)
 
+@app.route('/test', methods=['GET'])
+def test():
+    return "Test successful"
+
 if __name__ == '__main__':
     app.run(debug=True, port=80, host='0.0.0.0')
