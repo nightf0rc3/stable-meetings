@@ -68,10 +68,6 @@ def get_route_coordinates(origin, destination, api_key, mode = 'transit', distan
 
     return filtered_coordinates
 
-@app.route('/demo')
-def greet():
-    return send_from_directory('./dist', 'indexDemo.html')
-
 @app.route('/get_route', methods=['GET'])
 def get_route():
     origin = request.args.get('origin')
