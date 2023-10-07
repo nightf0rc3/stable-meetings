@@ -5,14 +5,18 @@
 
   "action": {"default_popup": "index.html"},
   "description": "Show mobile data coverage on your train ride",
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage", "tabs", "https://18.197.50.92:80/*"],
 
   "content_scripts": [
     {
-      "matches": ["https://www.google.de/maps/*"],
+      "matches": ["https://www.bahn.de/buchung/fahrplan/*"],
       "js": ["connection-check-script.js"]
     }
   ],
-  "author": "developer@example.com"
-
+  "author": "developer@example.com",
+  "web_accessible_resources": [
+    {
+      "resources": ["signal-solid.svg"],
+      "matches": ["https://www.bahn.de/*"]
+    }]
 }
