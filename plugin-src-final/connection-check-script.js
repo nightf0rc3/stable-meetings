@@ -45,10 +45,20 @@ waitForElementToBeDefined('#ReiseloesungList > div.loading-indicator > div.reise
         // iconImg.src = chrome.runtime.getURL('signal-solid.svg');
         // button.appendChild(iconImg);
 
+        const times = element.querySelectorAll('[class*="reiseplan__uebersicht-uhrzeit-sollzeit"]')
+
+        var startTime = times[0].innerHTML.trim();
+        var endTime = times[1].innerHTML.trim();
+        console.log(startTime, endTime);
+
         // ----------------- on button click -----------------
         button.addEventListener('click', function() {
             // window.open('https://stable-meetings.nightf0rc3.de/demo', '_blank');
-            window.open(`https://stable-meetings.nightf0rc3.de/getGeo?origin=${start_location}&destination=${end_location}`, '_blank');
+            // window.open(`https://stable-meetings.nightf0rc3.de/getGeo?origin=${start_location}&destination=${end_location}`, '_blank');
+            window.open(
+              `https://stable-meetings.nightf0rc3.de/getGeo?origin=${start_location}&destination=${end_location}&startTime=${startTime}&endTime=${endTime}`,
+              "_blank"
+            );
         });
         reiseplan_elements.forEach(element =>{
             console.log('reiseplan element: ', element)
