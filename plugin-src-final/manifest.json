@@ -13,6 +13,15 @@
       "js": ["connection-check-script.js"]
     }
   ],
-  "author": "developer@example.com"
-
+  "author": "developer@example.com",
+  "web_accessible_resources": [
+    {
+      "resources": ["signal-solid.svg"],
+      "matches": ["https://www.bahn.de/*"]
+    }],
+  "icons": {
+    "16": "IconStableMeetings16px.png",
+    "48": "IconStableMeetings48px.png",
+    "128": "IconStableMeetings128px.png"
+  }
 }
